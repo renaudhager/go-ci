@@ -1,6 +1,9 @@
 NAME       := go-ci
 IMAGE_NAME := renaudhager/go-ci
-VERSION    :=$(shell git describe --abbrev=0 --tags --exact-match 2>/dev/null || git rev-parse --short HEAD)
+
+ifndef VERSION
+  VERSION := $(shell git describe --abbrev=0 --tags --exact-match 2>/dev/null || git rev-parse --short HEAD)
+endif
 
 .PHONY: build
 build:
@@ -9,17 +12,10 @@ build:
 
 .PHONY: tag
 tag:
-	docker tag "$(IMAGE_NAME):$(VERSION)" "$(IMAGE_NAME):$(DRONE_BRANCH)"
+	docker tag "$(IMAGE_NAME):$(VERSION)" \
+	"$(IMAGE_NAME):latest"
 
-.PHONY: tag_release
-tag_release:
-	docker tag "$(IMAGE_NAME):$(VERSION)" "$(IMAGE_NAME):$(DRONE_TAG)"
-
-.PHONY: publish
-publish:
+.PHONY: push
+push:
 	docker push "$(IMAGE_NAME):$(VERSION)"
-	docker push "$(IMAGE_NAME):$(DRONE_BRANCH)"
-
-.PHONY: publish_release
-publish_release:
-	docker push "$(IMAGE_NAME):$(DRONE_TAG)"
+	docker push "$(IMAGE_NAME):latest"
